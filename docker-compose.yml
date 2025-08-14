@@ -51,8 +51,9 @@ services:
     image: ubuntu:20.04
     volumes:
       - "./mediamtx:/usr/app/src"
+    network_mode: host
     working_dir: /usr/app/src
-    command: bash -c "./mediamtx"
+    command: bash -c "apt update -y && apt install ffmpeg -y && ./mediamtx"
   # antina-tracker-api:
   #  container_name: antina-tracker-api
   #  image: python:3.10-slim
