@@ -46,7 +46,13 @@ services:
     working_dir: /usr/src/app
     command: bash -c "npm install && npm run dev"
     restart: always
-
+  
+  media-forwarding-server:
+    image: ubuntu:20.04
+    volumes:
+      - "./mediamtx:/usr/app/src"
+    working_dir: /usr/app/src
+    command: bash -c "./mediamtx"
   # antina-tracker-api:
   #  container_name: antina-tracker-api
   #  image: python:3.10-slim
