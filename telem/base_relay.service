@@ -1,0 +1,10 @@
+[Unit]
+Description=BASE RELAY
+After=redis_fleetrf.service
+
+[Service]
+ExecStart=/home/fleetrf/base_relay.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

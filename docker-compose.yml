@@ -1,0 +1,66 @@
+version: "3"
+services:
+  redis-base-fleetrf:
+    container_name: redis-base-fleetrf
+    image: redis
+    ports:
+      - "6382:6379"
+    restart: always
+
+  rabbitmq-base-fleetrf:
+    container_name: rabbitmq-base-fleetrf
+    image: rabbitmq
+    depends_on:
+      - redis-base-fleetrf
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    # command: redis-server --requirepass Bazinga247
+    # network_mode: "host"
+    ports:
+      - "5673:5672"
+    restart: always
+
+  bases-relay-api:
+    container_name: base-relay-api
+    image: node:18
+    depends_on:
+      - redis-base-fleetrf
+      - rabbitmq-base-fleetrf
+    volumes:
+      - "./telem:/usr/src/app"
+    network_mode: host
+    working_dir: /usr/src/app
+    command: bash -c "npm install && npm run dev"
+    restart: always
+
+  telem-forwarder-api:
+    container_name: telem-forwarder-api
+    image: node:18
+    depends_on:
+      - redis-base-fleetrf
+      - bases-relay-api
+    volumes:
+      - "./telemforwarder:/usr/src/app"
+    network_mode: host
+    working_dir: /usr/src/app
+    command: bash -c "npm install && npm run dev"
+    restart: always
+
+  # antina-tracker-api:
+  #  container_name: antina-tracker-api
+  #  image: python:3.10-slim
+  #  depends_on:
+  #    - redis-base-fleetrf
+  #    - telem-forwarder-api
+  #  volumes:
+  #    - "./antenaTracker:/usr/src/app"
+  #  devices:
+  #    - "/dev/ttyUSB0:/dev/ttyUSB0"  # Make sure /dev/ttyUSB0 is accessible in the container
+  #  network_mode: host
+  #  privileged: true
+  #  user: root
+  #  working_dir: /usr/src/app
+  #  #command: bash -c "pip3 install pymavlink && pip3 install redis && pip3 install pyserial && python3 antineaTracker.py"
+  #  command: bash -c "python antineaTracker.py"
+  #  restart: always

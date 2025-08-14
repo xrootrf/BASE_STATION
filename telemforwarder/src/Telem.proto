@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+message Altitude{
+        float altitude_monotonic_m= 1;
+        float altitude_amsl_m=2;
+        float altitude_local_m=3;
+        float altitude_relative_m=4;
+        float altitude_terrain_m=5;
+        float bottom_clearance_m=6;
+}
+
+message Battery{
+        float id=1;
+        float temperature_degc=2;
+        float voltage_v=3;
+        float current_battery_a=4;
+        float capacity_consumed_ah=5;
+        float remaining_percent= 6;
+}
+
+message Position{
+        float latitude_deg=1;
+        float longitude_deg=2;
+        float absolute_altitude_m=3;
+        float relative_altitude_m=4;
+}
+
+message Attitude{
+        float roll_deg=1;
+        float pitch_deg=2;
+        float yaw_deg=3;
+        float timestamp_us=4;
+}
+
+
+message FixedwingMatrics{
+        float airspeed_m_s= 1;
+        float throttle_percentage=2;
+        float climb_rate_m_s=3;
+}
+
+message Health{
+        bool is_gyrometer_calibration_ok=1;
+        bool is_accelerometer_calibration_ok=2;
+        bool is_magnetometer_calibration_ok =3;
+        bool is_local_position_ok =4;
+        bool is_global_position_ok =5;
+        bool is_home_position_ok=6;
+        bool is_armable=7;
+}
+
+message AccelerationFrd{
+        float forward_m_s2=1;
+        float right_m_s2=2;
+        float down_m_s2=3;
+}
+message AngularVelocityFrd{
+        float forward_rad_s=1;
+        float right_rad_s=2;
+        float down_rad_s=3;
+}
+message MagneticFieldFrd{
+        float forward_gauss=1;
+        float right_gauss=2;
+        float down_gauss=3;
+}
+
+message IMU{
+        AccelerationFrd acceleration_frd=1;
+        AngularVelocityFrd angular_velocity_frd=2;
+        MagneticFieldFrd magnetic_field_frd=3;
+        float temperature_degc=4;
+        float timestamp_us=5;
+}
+
+
+message RawGPS{
+        float timestamp_us= 1;
+        float latitude_deg=2;
+        float longitude_deg=3;
+        float absolute_altitude_m=4;
+        float hdop=5;
+        float vdop=6;
+        float velocity_m_s = 7;
+        float cog_deg=8;
+        float altitude_ellipsoid_m=9;
+        float horizontal_uncertainty_m=10;
+        float vertical_uncertainty_m=11;
+        float velocity_uncertainty_m_s=12;
+        float heading_uncertainty_deg=13;
+        float yaw_deg=14;
+}
+
+
+message RcStatus{
+        bool was_available_once=1;
+        bool is_available=2;
+        float signal_strength_percent=3;
+}
+
+message GpsInfo{
+        float num_satellites=1;
+        string fix_type=2;
+}
+
+
+message FlightMode{
+        string value=1;
+}
+
+message MissionStatus{
+        bool completed=1;
+}
+
+message Heading{
+        float heading_deg=1;
+}
+message VtolState{
+        string value=1;
+}
+
+message Armed{
+        bool value=1;
+}
+
+
+message StatusText{
+        string type=1;
+        string text=2;
+}
+
+
+
+message BboxData{
+        int64 id=1;
+        repeated int64 bbox=2;
+}
+
+message Radio{
+	string type=1;
+	int64 rssi=2;
+}
+
+message Telem{
+        Altitude altitude = 1;
+        Battery battery = 2;
+        Attitude attitude = 3;
+        FixedwingMatrics fixedwingMatrics=4;
+        Health health=5;
+        IMU imu=6;
+        RawGPS rawGps=7;
+        RcStatus rcStatus=8;
+        Position position=9;
+        GpsInfo gpsInfo=10;
+        FlightMode flightMode=11;
+        Heading heading=12;
+        VtolState vtolState=13;
+        Armed armed=14;
+        StatusText statusText=15;
+        MissionStatus missionStatus=16;
+        repeated BboxData bboxes=17;
+        Radio radio=18;
+}
+
+
+
+message Data{
+        string droneId=1;
+        string baseId=2;
+        Telem telem=3;
+}

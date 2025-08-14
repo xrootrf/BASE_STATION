@@ -1,0 +1,478 @@
+const amqp = require("amqplib");
+
+class RabbitMQ {
+  connection = null;
+  channel = null;
+  ip = null;
+  port = null;
+  queuesNames = [];
+  //   queues = [];
+  constructor(ip, port, queuesNames, socketClient, redisPersonal) {
+    this.ip = ip;
+    this.port = port;
+    this.queuesNames = queuesNames;
+    this.socketClient = socketClient;
+    this.redisPersonal = redisPersonal;
+    this.socketClient.socket.on("getlocation", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      console.log(this.socketClient.socket.connected);
+      this.sendMessage(droneid, {
+        action: "getlocation",
+        payload: { responseid: baseresponseid },
+      });
+      // this.io.to(droneid).emit("getlocation", { responseid: baseresponseid });
+    });
+
+    // ====================CAMERA CONTROLL=========================
+
+    this.socketClient.socket.on("switchdaynight", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "switchdaynight",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("startcamstream", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "startcamstream",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("updateparam", (data, callback) => {
+      const { param, baseresponseid } = data;
+      console.log(param);
+      this.sendMessage(param.droneId, {
+        action: "updateparam",
+        payload: { responseid: baseresponseid, param },
+      });
+    });
+
+    this.socketClient.socket.on("stopcamstream", (data, callback) => {
+      console.log("=================stopping camera....!!!!===========");
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "stopcamstream",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("changeexposure", (data, callback) => {
+      const { droneid, baseresponseid, auto_exposureEx, exposure_time } = data;
+      console.log(auto_exposureEx, exposure_time);
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "changeexposure",
+        payload: {
+          responseid: baseresponseid,
+          auto_exposureEx,
+          exposure_time,
+        },
+      });
+    });
+
+    this.socketClient.socket.on("changeiso", (data, callback) => {
+      const { droneid, baseresponseid, gain_mode, gaintrigger, manual_AGain } =
+        data;
+      console.log(manual_AGain);
+      // console.log(auto_exposureEx,exposure_time)
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "changeiso",
+        payload: {
+          responseid: baseresponseid,
+          gain_mode,
+          gaintrigger,
+          manual_AGain,
+        },
+      });
+    });
+
+    this.socketClient.socket.on("changezoom", (data, callback) => {
+      const { droneid, baseresponseid, direction } = data;
+      console.log("changing ZOOM")
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "changezoom",
+        payload: {
+          responseid: baseresponseid,
+          direction
+        },
+      });
+    });
+
+
+    this.socketClient.socket.on("movegimbal", (data, callback) => {
+      const { droneid, , direction } = data;
+      // console.log(auto_exposureEx,exposure_time)
+      
+      console.log("moving Gimbal")
+
+      this.sendMessage(droneid, {
+        action: "movegimbal",
+        payload: {
+          responseid: responseId,
+          direction 
+        },
+      });
+    });
+
+
+    this.socketClient.socket.on("currentcamsettings", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log("========<getting current cam settings>=================");
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "currentcamsettings",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("getparams", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log("getParams command recieved for : ", droneid);
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "getparams",
+        payload: { responseid: baseresponseid },
+      });
+      // this.io.to(droneid).emit("arm", { responseid: baseresponseid });
+    });
+    this.socketClient.socket.on("switchrecordtrigger", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log("switchrecordtrigger command recieved for : ", droneid);
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "switchrecordtrigger",
+        payload: { responseid: baseresponseid },
+      });
+      // this.io.to(droneid).emit("arm", { responseid: baseresponseid });
+    });
+
+    // ====================DRONE CONTROLL=========================
+    this.socketClient.socket.on("arm", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log("arm command recieved for : ", droneid);
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "arm",
+        payload: { responseid: baseresponseid },
+      });
+      // this.io.to(droneid).emit("arm", { responseid: baseresponseid });
+    });
+
+    this.socketClient.socket.on("disarm", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "disarm",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("land", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      //   this.io.to(droneid).emit("land", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "land",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("rtl", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      //   this.io.to(droneid).emit("rtl", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "rtl",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("kill", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      //   this.io.to(droneid).emit("kill", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "kill",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("hold", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      //   this.io.to(droneid).emit("hold", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "hold",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    // this.socketClient.socket.on("takeoff", (data, callback) => {
+    //   const { droneid, baseresponseid, height } = data;
+    //   console.log(droneid, baseresponseid);
+    //   this.io
+    //     .to(droneid)
+    //     .emit("takeoff", { responseid: baseresponseid, height });
+    // });
+    this.socketClient.socket.on("movedrone", (data, callback) => {
+      const temp = { ...data };
+      const droneid = temp.droneid;
+      console.log("mode drone ", droneid);
+      delete temp.droneid;
+      // this.io.to(data.droneid).emit("movedrone", temp);
+      this.sendMessage(droneid, {
+        action: "movedrone",
+        payload: temp,
+      });
+    });
+
+
+    this.socketClient.socket.on("movedronetodistance", (data, callback) => {
+      const temp = { ...data };
+      const droneid = temp.droneid;
+      console.log("mode drone to ditance", droneid);
+console.log(temp)
+      delete temp.droneid;
+      // this.io.to(data.droneid).emit("movedrone", temp);
+      this.sendMessage(droneid, {
+        action: "movedronetodistance",
+        payload: temp,
+      });
+    });
+
+    this.socketClient.socket.on("yawdrone", (data, callback) => {
+      const temp = { ...data };
+      const droneid = temp.droneid;
+      console.log("yaw drone", droneid);
+      delete temp.droneid;
+      // this.io.to(data.droneid).emit("movedrone", temp);
+      this.sendMessage(droneid, {
+        action: "yawdrone",
+        payload: temp,
+      });
+    });
+
+    this.socketClient.socket.on("uploadmission", (data, callback) => {
+      console.log("uploading missions");
+      const {
+        droneid,
+        baseresponseid,
+        flightid,
+        rtl,
+        waypoints,
+        geofences,
+        acceptance_radius,
+      } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "uploadmission",
+        payload: {
+          responseid: baseresponseid,
+          flightid,
+          rtl,
+          waypoints,
+          geofences,
+          acceptance_radius,
+        },
+      });
+      //   this.io.to(droneid).emit("uploadmission", {
+      //     responseid: baseresponseid,
+      //     flightid,
+      //     rtl,
+      //     waypoints,
+      //     geofences,
+      //     acceptance_radius,
+      //   });
+    });
+
+    this.socketClient.socket.on("startmission", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      //   this.io.to(droneid).emit("startmission", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "startmission",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("startcamerastream", (data, callback) => {
+      const { droneid, baseresponseid, cameratype } = data;
+      //   this.io.to(droneid).emit("startmission", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "startcamerastream",
+        payload: { responseid: baseresponseid, cameratype },
+      });
+    });
+
+    this.socketClient.socket.on("stopcamerastream", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      //   this.io.to(droneid).emit("startmission", { responseid: baseresponseid });
+      this.sendMessage(droneid, {
+        action: "stopcamerastream",
+        payload: { responseid: baseresponseid },
+      });
+    });
+    // // }
+    // this.socketClient.socket.on("switchdaynight", (data, callback) => {
+    //   const { droneid, baseresponseid } = data;
+    //   console.log(droneid, baseresponseid);
+    //   this.io
+    //     .to(droneid)
+    //     .emit("switchdaynight", { responseid: baseresponseid });
+    // });
+
+    this.socketClient.socket.on("goto", (data, callback) => {
+      const { droneid, lat, lng, alt,responseId } = data;
+      console.log(droneid, lat, lng,alt, responseId);
+      console.log("===============GOING TO LOCATION================");
+      this.sendMessage(droneid, {
+        action: "goto",
+        payload: { responseid: responseId, lat, lng,alt },
+      });
+      // this.io.to(droneid).emit("goto", { responseid: responseId, lat, lng });
+    });
+
+    // this.socketClient.socket.on("startcamcapture", (data, callback) => {
+    //   const { droneid, baseresponseid } = data;
+    //   console.log(droneid, baseresponseid);
+    //   console.log("===============STARTING CAPTURING=================");
+    //   this.io
+    //     .to(droneid)
+    //     .emit("startcamcapture", { responseid: baseresponseid });
+    // });
+
+    // this.socketClient.socket.on("stopcamcapture", (data, callback) => {
+    //   const { droneid, baseresponseid } = data;
+    //   console.log(droneid, baseresponseid);
+    //   console.log("==============SToPPING CAPTURING=================");
+    //   this.io
+    //     .to(droneid)
+    //     .emit("stopcamcapture", { responseid: baseresponseid });
+    // });
+
+    // this.socketClient.socket.on("startcamstream", (data, callback) => {
+    //   const { droneid, baseresponseid } = data;
+    //   console.log(droneid, baseresponseid);
+    //   this.io
+    //     .to(droneid)
+    //     .emit("startcamstream", { responseid: baseresponseid });
+    // });
+
+    // this.socketClient.socket.on("stopcamstream", (data, callback) => {
+    //   console.log("=================stopping camera....!!!!===========");
+    //   const { droneid, baseresponseid } = data;
+    //   console.log(droneid, baseresponseid);
+    //   this.io.to(droneid).emit("stopcamstream", { responseid: baseresponseid });
+    // });
+
+    // this.socketClient.socket.on("changeexposure", (data, callback) => {
+    //   const { droneid, baseresponseid, auto_exposureEx, exposure_time } = data;
+    //   console.log(auto_exposureEx, exposure_time);
+    //   console.log(droneid, baseresponseid);
+    //   this.io.to(droneid).emit("changeexposure", {
+    //     responseid: baseresponseid,
+    //     auto_exposureEx,
+    //     exposure_time,
+    //   });
+    // });
+    // this.socketClient.socket.on("changeiso", (data, callback) => {
+    //   const { droneid, baseresponseid, gain_mode, gaintrigger, manual_AGain } =
+    //     data;
+    //   console.log(manual_AGain);
+    //   // console.log(auto_exposureEx,exposure_time)
+    //   console.log(droneid, baseresponseid);
+    //   this.io.to(droneid).emit("changeiso", {
+    //     responseid: baseresponseid,
+    //     gain_mode,
+    //     gaintrigger,
+    //     manual_AGain,
+    //   });
+    // });
+
+    // this.socketClient.socket.on("currentcamsettings", (data, callback) => {
+    //   const { droneid, baseresponseid } = data;
+    //   console.log("========<getting current cam settings>=================");
+    //   console.log(droneid, baseresponseid);
+    //   this.io
+    //     .to(droneid)
+    //     .emit("currentcamsettings", { responseid: baseresponseid });
+    // });
+  }
+  async connect() {
+    try {
+      this.connection = await amqp.connect(`amqp://${this.ip}:${this.port}`);
+      this.channel = await this.connection.createChannel();
+      const res = await this.channel.assertQueue("join", { durable: true });
+      this.channel
+        .consume(
+          "join",
+          (message) => {
+            if (message) {
+              console.log(
+                " [x] Joining room  '%s'",
+                message.content.toString()
+              );
+              this.socketClient.joinroom(message.content.toString());
+            }
+          },
+          { noAck: true }
+        )
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      const res2 = await this.channel.assertQueue("response", {
+        durable: true,
+      });
+      console.log(res2);
+      this.channel
+        .consume(
+          "response",
+          (message) => {
+            if (message) {
+              this.redisPersonal.publish(
+                "api_drone_responses",
+                message.content.toString()
+              );
+            }
+          },
+          { noAck: true }
+        )
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      return true;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  }
+  async createqueuesNames() {
+    for (let i = 0; i < this.queuesNames.length; i++) {
+      const queueName = this.queuesNames[i];
+      const res = await this.channel.assertQueue(queueName, { durable: true });
+
+      console.log(res);
+    }
+  }
+  sendMessage(queueName, data) {
+    this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), {
+      expiration: 10000,
+    });
+  }
+}
+
+module.exports = RabbitMQ;

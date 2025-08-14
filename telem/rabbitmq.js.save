@@ -1,0 +1,65 @@
+const amqp = require("amqplib");
+
+class RabbitMQ {
+  connection = null;
+  channel = null;
+  ip = null;
+  port = null;
+  queuesNames = [];
+  //   queues = [];
+  constructor(ip, port, queuesNames, socketClient, redisPersonal) {
+    this.ip = ip;
+    this.port = port;
+    this.queuesNames = queuesNames;
+    this.socketClient = socketClient;
+    this.redisPersonal = redisPersonal;
+    this.socketClient.socket.on("getlocation", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      console.log(this.socketClient.socket.connected);
+      this.sendMessage(droneid, {
+        action: "getlocation",
+        payload: { responseid: baseresponseid },
+      });
+      // this.io.to(droneid).emit("getlocation", { responseid: baseresponseid });
+    });
+
+    // ====================CAMERA CONTROLL=========================
+
+    this.socketClient.socket.on("switchdaynight", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "switchdaynight",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("startcamstream", (data, callback) => {
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "startcamstream",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
+    this.socketClient.socket.on("updateparam", (data, callback) => {
+      const { param, baseresponseid } = data;
+      console.log(param);
+      this.sendMessage(param.droneId, {
+        action: "updateparam",
+        payload: { responseid: baseresponseid, param },
+      });
+    });
+
+    this.socketClient.socket.on("stopcamstream", (data, callback) => {
+      console.log("=================stopping camera....!!!!===========");
+      const { droneid, baseresponseid } = data;
+      console.log(droneid, baseresponseid);
+      this.sendMessage(droneid, {
+        action: "stopcamstream",
+        payload: { responseid: baseresponseid },
+      });
+    });
+
