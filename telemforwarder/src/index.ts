@@ -117,8 +117,8 @@ socket.on("message", (msg) => {
     const bytes=data.serializeBinary()
     //let temp: any = JSON.parse(data.toString());
 
-    socket.send(bytes, 3030, "192.168.1.88", (err, bytes) => {
-    // socket.send(bytes, 3030, "122.180.30.164", (err, bytes) => {
+    // socket.send(bytes, 3030, "192.168.1.88", (err, bytes) => {
+    socket.send(bytes, 3030, "122.180.30.164", (err, bytes) => {
       if (err) {
         console.error(err);
         return;

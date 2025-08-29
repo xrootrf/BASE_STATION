@@ -11,32 +11,39 @@ import time
 import base64
 import io
 import uuid
+from fastapi.middleware.cors import CORSMiddleware
+
 
 r=redis.Redis(host="0.0.0.0",port=6382,db=0)
-
-while True:
-    try:
-        print(r)
-        item=r.rpop("metadata")
-        data=json.loads(item)
-        img=base64.b64decode(data["image"])
-        img=io.BytesIO(img)
-        print(img)
-        files = {
-            'file': (f"{uuid.uuid4()}",img,"image/jpeg")
-        }
-        dta={}
-        dta["data"]=json.dumps(data["data"])
-        requests.post("https://droneuse.com/api/detections/upload",files=files,data=dta)
-        # print(data)
-    except Exception as e:
-        print(e)
-    time.sleep(0.1)
+pubsub=r.pubsub()
+pubsub.subscribe("metadata")
+print("started listening on redis to forward metadata")
+# while True:
+#     try:
+#         for message in pubsub.listen():
+#             if message['type'] != 'message':
+#                 continue;
+#             item=message['data'].decode()
+#             if not item:
+#                 continue
+#             data=json.loads(item)
+#             img=base64.b64decode(data["image"])
+#             img=io.BytesIO(img)
+#             print(img)
+#             files = {
+#                 'file': (f"{uuid.uuid4()}",img,"image/jpeg")
+#             }
+#             dta={}
+#             dta["data"]=json.dumps(data["data"])
+#             requests.post("https://droneuse.com/api/detections/upload",files=files,data=dta)
+#             # print(data)
+#     except Exception as e:
+#         print(e)
+#     time.sleep(0.1)
 
 @app.post("/api/detections/upload")
 async def upload(file: UploadFile = File(...),
    data: str = Form(...)):
-    
     # print(file_content)
     # Prepare multipart form data to forward
     img=await file.read()
@@ -46,7 +53,7 @@ async def upload(file: UploadFile = File(...),
     print(data)
     
     data={"data":data}
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=False) as client:
         forward_response = await client.post("https://droneuse.com/api/detections/upload", files=files,data=data)
 
     return {

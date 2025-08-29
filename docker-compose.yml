@@ -13,6 +13,7 @@ services:
     depends_on:
       - redis-base-fleetrf
     environment:
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_amqp_frame_max 8192"
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
     # command: redis-server --requirepass Bazinga247
@@ -54,6 +55,17 @@ services:
     network_mode: host
     working_dir: /usr/app/src
     command: bash -c "apt update -y && apt install ffmpeg -y && ./mediamtx"
+    restart: always
+  
+  detection-forwarder:
+    image: python:3
+    volumes:
+      - "./sender:/usr/app/src"
+    network_mode: host
+    working_dir: /usr/app/src
+    command: bash -c "pip3 install uv && uv run main.py"
+    restart: always
+
   # antina-tracker-api:
   #  container_name: antina-tracker-api
   #  image: python:3.10-slim

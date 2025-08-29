@@ -25,7 +25,16 @@ class RabbitMQClient {
     }
     while(!this.isInitialized){
     try {
-      this.connection = await connect("amqp://user:password@droneuse.com:5673");
+      
+      this.connection =await connect({
+        protocol: 'amqp',
+      hostname: 'droneuse.com',
+      port: 5673,
+      frameMax: 131072, // set this >= 8192,
+      username:"user",
+      password:"password"
+      });
+      
       console.log("connected to rabbitmq");
       this.producerChannel = await this.connection.createChannel();
       this.consumerChannel = await this.connection.createChannel();

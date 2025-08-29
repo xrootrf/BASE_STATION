@@ -26,51 +26,51 @@ const init = async () => {
     console.log(err);
   }
 
-  const socketOptions = {
-    path: "/ws/droneingest",
-    autoConnect: true,
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    extraHeaders: {
-      type: "base",
-      baseid: "6384a26eeb99ea2bf400d32f",
-      pass: "123123",
-    },
-    //   reconnectionDelay: 500,
-    //   timeout: 1000,
-  };
-  console.log(process.env.DRONEINGEST_API);
-  const socketClient = new SocketIOClient(
-    process.env.DRONEINGEST_API,
-    socketOptions
-  );
+  // const socketOptions = {
+  //   path: "/ws/droneingest",
+  //   autoConnect: true,
+  //   reconnection: true,
+  //   reconnectionAttempts: Infinity,
+  //   extraHeaders: {
+  //     type: "base",
+  //     baseid: "6384a26eeb99ea2bf400d32f",
+  //     pass: "123123",
+  //   },
+  //   //   reconnectionDelay: 500,
+  //   //   timeout: 1000,
+  // };
+  // console.log(process.env.DRONEINGEST_API);
+  // const socketClient = new SocketIOClient(
+  //   process.env.DRONEINGEST_API,
+  //   socketOptions
+  // );
   const redisPersonalPub = await redisClient.connect(
     process.env.REDIS_HOST,
     {},
     process.env.REDIS_PORT
   );
-  const rabbitmq = new RabbitMQ(
-    process.env.SERVER_IP,
-    process.env.RABBIT_MQ_PORT,
-    droneIds,
-    socketClient,
-    redisPersonalPub
-    // ["hello"]
-  );
-  let rabbitConnected = false;
-  while (!rabbitConnected) {
-    try {
-      const connected = await rabbitmq.connect();
-      if (connected) {
-        await rabbitmq.createqueuesNames();
-        rabbitConnected = true;
-      }
-    } catch (err) {
-      console.log("retrying to connect rabbit ");
-      console.log("retrying to connect rabbit ");
-      // console.log(err);
-    }
-  }
+  // const rabbitmq = new RabbitMQ(
+  //   process.env.SERVER_IP,
+  //   process.env.RABBIT_MQ_PORT,
+  //   droneIds,
+  //   socketClient,
+  //   redisPersonalPub
+  //   // ["hello"]
+  // );
+  // let rabbitConnected = false;
+  // while (!rabbitConnected) {
+  //   try {
+  //     const connected = await rabbitmq.connect();
+  //     if (connected) {
+  //       await rabbitmq.createqueuesNames();
+  //       rabbitConnected = true;
+  //     }
+  //   } catch (err) {
+  //     console.log("retrying to connect rabbit ");
+  //     console.log("retrying to connect rabbit ");
+  //     // console.log(err);
+  //   }
+  // }
 
   console.log("===================================");
   console.log(process.env.REDIS_HOST, process.env.REDIS_PORT);
@@ -113,14 +113,14 @@ const init = async () => {
   //     resolve();
   //   });
   // });
-  redisPersonalSubs.on("message", async (channel, data) => {
-    if (channel === "api_drone_responses") {
-      // const resp = JSON.parse(data);
-      console.log(`===================base got response==================`);
-      console.log(data);
-      socketClient.sendtoserver("api_base_response", data);
-    }
-  });
+  // redisPersonalSubs.on("message", async (channel, data) => {
+  //   if (channel === "api_drone_responses") {
+  //     // const resp = JSON.parse(data);
+  //     console.log(`===================base got response==================`);
+  //     console.log(data);
+  //     socketClient.sendtoserver("api_base_response", data);
+  //   }
+  // });
 };
 init();
 // while (true) {}

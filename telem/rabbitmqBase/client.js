@@ -22,18 +22,39 @@ class RabbitMQBase {
     }
     while (!this.isInitialized)
     try {
-      this.connection = await connect("amqp://user:password@0.0.0.0:5673");
+      this.connection =await connect({
+        protocol: 'amqp',
+      hostname: '0.0.0.0',
+      port: 5673,
+      frameMax: 131072 , // set this >= 8192
+      username:"user",
+      password:"password"// set this >= 8192
+      });
       this.connection.on('close', function() {
     console.error("connection to RabbitMQ closed!");
     setTimeout(async()=>{
-      this.connection = await connect("amqp://user:password@0.0.0.0:5673");
+      this.connection = this.connection =await connect({
+        protocol: 'amqp',
+      hostname: '0.0.0.0',
+      port: 5673,
+      frameMax: 131072 , // set this >= 8192
+      username:"user",
+      password:"password"// set this >= 8192
+      });
     }, 5000); // Retry connection after 10 seconds
 });
 
 this.connection.on('error', function(err) {
     console.error(err);
    setTimeout(async()=>{
-      this.connection = await connect("amqp://user:password@0.0.0.0:5673");
+    this.connection =await connect({
+      protocol: 'amqp',
+    hostname: '0.0.0.0',
+    port: 5673,
+    frameMax: 131072 , // set this >= 8192
+    username:"user",
+    password:"password"// set this >= 8192
+    });
     }, 5000); // Retry connection after 10 seconds
 });
       console.log("connected to rabbitmq");
