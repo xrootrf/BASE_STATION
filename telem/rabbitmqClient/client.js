@@ -39,7 +39,7 @@ class RabbitMQClient {
       this.producerChannel = await this.connection.createChannel();
       this.consumerChannel = await this.connection.createChannel();
       const { queue: replyQueueName } = await this.consumerChannel.assertQueue(
-        "6384a26eeb99ea2bf400d32f",
+        "64464823b202ebf67ca8bdaf",
         {
            durable:true
         }

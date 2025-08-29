@@ -103,7 +103,7 @@ socket.on("message", (msg) => {
     // console.log(msg)
     console.log(msg.length," bytes recieved ")
     const telem=Data.deserializeBinary(msg).toObject()
-    telem.baseId="6384a26eeb99ea2bf400d32f"
+    telem.baseId="64464823b202ebf67ca8bdaf"
     setDataToRedis(telem)
    //const radio=new Radio()
     

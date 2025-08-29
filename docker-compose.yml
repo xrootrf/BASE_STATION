@@ -54,7 +54,7 @@ services:
       - "./mediamtx:/usr/app/src"
     network_mode: host
     working_dir: /usr/app/src
-    command: bash -c "apt update -y && apt install ffmpeg -y && ./mediamtx"
+    command: bash -c "apt update -y && apt install ffmpeg -y && chmod +x mediamtx &&  ./mediamtx"
     restart: always
   
   detection-forwarder:
