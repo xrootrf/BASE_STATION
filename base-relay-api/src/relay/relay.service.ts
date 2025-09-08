@@ -16,7 +16,7 @@ export class RelayService {
       const client = ClientProxyFactory.create({
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://user:password@122.180.30.164:5673'],
+          urls: ['amqp://user:password@0.0.0.0:5673'],
           queue: queueName,
           queueOptions: {
             durable: true,
@@ -42,5 +42,19 @@ export class RelayService {
     const client = this.getClient(target);
     this.logger.log(`Forwarding command ${action} to  queue: ${target}`);
     return firstValueFrom(client.send({ cmd: action }, message));
+  }
+
+
+  async emitForwardMessage(message: any) {
+    const { target, action, payload } = message;
+
+    if (!target) {
+      this.logger.error(`Message missing target: ${JSON.stringify(message)}`);
+      return;
+    }
+
+    const client = this.getClient(target);
+    this.logger.log(`Forwarding command ${action} to  queue: ${target}`);
+    return firstValueFrom(client.emit({ cmd: action }, message));
   }
 }

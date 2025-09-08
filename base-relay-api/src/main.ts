@@ -8,7 +8,7 @@ async function bootstrap() {
     {
       transport: Transport.RMQ,
       options: {
-        urls: ['amqp://user:password@122.180.30.164:5673'],
+        urls: ['amqp://user:password@192.168.2.100:5673'],
         queue: '6384a26eeb99ea2bf400d32f', // messages come here first
         queueOptions: {
           durable: true,

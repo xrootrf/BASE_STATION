@@ -42,4 +42,11 @@ export class AppController {
     const value = await this.relayService.forwardMessage(message);
     return value;
   }
+
+
+  @MessagePattern({ cmd: 'movedrone' })
+  async moveDroneRelay(@Payload() message: any) {
+    const value = await this.relayService.emitForwardMessage(message);
+    return value;
+  }
 }

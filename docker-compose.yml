@@ -9,7 +9,7 @@ services:
 
   rabbitmq-base-fleetrf:
     container_name: rabbitmq-base-fleetrf
-    image: rabbitmq
+    image: rabbitmq:3.13.7-management
     depends_on:
       - redis-base-fleetrf
     environment:
@@ -20,11 +20,12 @@ services:
     # network_mode: "host"
     ports:
       - "5673:5672"
+      - "15672:15672"
     restart: always
 
   bases-relay-api:
     container_name: base-relay-api
-    image: node:18
+    image: node:22
     depends_on:
       - redis-base-fleetrf
       - rabbitmq-base-fleetrf

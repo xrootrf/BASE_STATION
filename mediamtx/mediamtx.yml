@@ -639,7 +639,7 @@ pathDefaults:
   # * MTX_SOURCE_ID: source ID
     
   runOnReady: >
-    ffmpeg -i rtsp://0.0.0.0:$RTSP_PORT/$MTX_PATH -c copy -f rtsp rtsp://122.180.30.164:8554/$MTX_PATH
+    ffmpeg -i rtsp://0.0.0.0:$RTSP_PORT/$MTX_PATH -c copy -f rtsp rtsp://192.168.2.100:8554/$MTX_PATH
   
   runOnReadyRestart: yes
   # Restart the command if it exits.
